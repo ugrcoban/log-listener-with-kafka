@@ -178,7 +178,7 @@ function load_page_data(){
         },error: function(jqXHR, textStatus, errorThrown){
 			 console.log('jqXHR:');
              console.log(jqXHR);
-			 alert("ERROR!");
+			 //alert("ERROR!");
 		}
     });
 }
