@@ -52,11 +52,11 @@
 						}
 						
 						try {
-							$UGR->db->exec("INSERT INTO {$last_table['name']} (timestamp,log_level,server_name,log_detail)
+							$UGR->db->query("INSERT INTO {$last_table['name']} (timestamp,log_level,server_name,log_detail)
 														VALUES ".implode(",",$sql_insert));
-						} catch(PDOException $ex) {
+						} catch(mysqli_sql_exception $ex) {
 							if($ex->getCode()!=23000)#double checker
-								$UGR->PDOException($ex);
+								$UGR->sqlException($ex);
 						}
 					}
 				}
@@ -93,6 +93,8 @@
 				$fp = fopen('chart.json', 'w');
 				fwrite($fp, json_encode($chart_data,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 				fclose($fp);
+				
+				$UGR->db->close();#close
 			}
 			
 		}#endRecord
