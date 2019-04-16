@@ -10,11 +10,6 @@
 	$topic = $consumer->newTopic("test");
 
 	$topic->consumeStart(0, RD_KAFKA_OFFSET_BEGINNING);
-
-	
-	## Find Last Table for insert DB
-	$last_table=$UGR->getLastTable();#name,date,order
-	$insert_limit=50;#Insert all records for break - checker limit
 				
 	
 	## Listen and catch kafka
@@ -26,6 +21,10 @@
 		#Waiting to array {timestamp, log_level, server_name, log_detail}   
 		if ($msg->payload) {
 			
+			## Find Last Table for insert DB
+			$last_table=$UGR->getLastTable();#name,date,order
+			$insert_limit=50;#Insert all records for break - checker limit
+	
 			## Records logs for one/multi
 			$payload=json_decode($msg->payload);
 			if($records=is_array($payload[0]) ? $payload : array("0"=>$payload)) {
