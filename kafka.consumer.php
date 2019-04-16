@@ -94,7 +94,6 @@
 				fwrite($fp, json_encode($chart_data,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 				fclose($fp);
 				
-				$UGR->db->close();#close
 			}
 			
 		}#endRecord
