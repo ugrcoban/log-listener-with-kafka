@@ -2,6 +2,7 @@
 
 Big data - log listener PHP & MYSQL & KAFKA.
 Upload logs to mysql and real-time display on charts.
+Explode big data with sql logs tables. Search it easy.
 
 ## Requirements
 
