@@ -25,9 +25,6 @@ Visiting `http://localhost` or `http://{local_ip}`.
 docker-compose exec php php kafka.consumer.php
 ```
 
-## Test, please delete to logs.
-kafka.producer.php create logs automatically for test.
-
 ## Documentation
 
 - Docker images for [kafka](https://hub.docker.com/r/wurstmeister/kafka/) and [zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper/)
