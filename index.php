@@ -39,6 +39,7 @@
 			## Display now if records
 			$counter=0;
 			if($rows!==NULL) {
+				$counter=COUNT($rows);
 				$display_limit=0;#It will not take long. HTML Lines waiting to us.
 				foreach($rows as $row) {
 					if(!$display_limit || $display_limit>++$i)
