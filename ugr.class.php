@@ -14,6 +14,7 @@
 		public function __construct() {
 			
 			## Default Settings ##
+			mysqli_report(MYSQLI_REPORT_STRICT); 
 			date_default_timezone_set("Europe/Istanbul");
 			header('Content-Type: text/html; charset=utf-8');
 	
@@ -41,9 +42,9 @@
 										****************/
 		private function connMysql() { 
 			try {
-				return $conn=new PDO("mysql:host={$this->sql['servername']};dbname={$this->sql['dbname']};charset=utf8mb4", $this->sql['username'], $this->sql['password'], array(PDO::ATTR_EMULATE_PREPARES => false,PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-			}	catch(PDOException $ex) {
-					$this->PDOException($ex);
+				return new mysqli($this->sql['servername'],$this->sql['username'],$this->sql['password'],$this->sql['dbname']);
+			 } catch(mysqli_sql_exception $ex) {
+					$this->sqlException($ex);
 			}
 		
 		}
@@ -83,13 +84,13 @@
 			
 			try {
 				
-				$stmt=$this->db->query("SELECT TABLE_NAME, TABLE_ROWS, round(((data_length + index_length)/1024/1024),2) TABLE_SIZE FROM information_schema.TABLES WHERE table_schema='{$this->getDbName()}' ".($_table===NULL ? "" : "AND table_name='{$_table}'")." ORDER BY(DATA_LENGTH + INDEX_LENGTH) DESC");
-				While($row=$stmt->fetch(PDO::FETCH_ASSOC)) {
+				$q=$this->db->query("SELECT TABLE_NAME, TABLE_ROWS, round(((data_length + index_length)/1024/1024),2) TABLE_SIZE FROM information_schema.TABLES WHERE table_schema='{$this->getDbName()}' ".($_table===NULL ? "" : "AND table_name='{$_table}'")." ORDER BY(DATA_LENGTH + INDEX_LENGTH) DESC");
+				While($row=$q->fetch_array(MYSQLI_ASSOC)) {
 					$return[$row['TABLE_NAME']]=array("rows"=>$row['TABLE_ROWS'],"size"=>$row['TABLE_SIZE']);
 				}
 				
-			} catch(PDOException $ex) {
-				$this->PDOException($ex);
+			} catch(mysqli_sql_exception $ex) {
+				$this->sqlException($ex);
 			}
 			
 			return $return ? $return : NULL; 
@@ -109,8 +110,8 @@
 				
 				
 				$last_table=NULL;
-				$stmt=$this->db->query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = '{$this->getDbName()}' AND table_name like '{$this->table['prefix']}%'");
-				While($row=$stmt->fetch(PDO::FETCH_ASSOC)) {
+				$q=$this->db->query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = '{$this->getDbName()}' AND table_name like '{$this->table['prefix']}%'");
+				While($row=$q->fetch_array(MYSQLI_ASSOC)) {
 					$record=str_replace(array("{$this->table['prefix']}","_"),array("","-"),$row['TABLE_NAME']);
 					$record_date=substr($record,0,10);
 					$record_order=intval(substr($record,11));
@@ -134,8 +135,8 @@
 					return $last_table;
 				}
 				
-			} catch(PDOException $ex) {
-				$this->PDOException($ex);
+			} catch(mysqli_sql_exception $ex) {
+				$this->sqlException($ex);
 			}
 			
 			return NULL;
@@ -164,9 +165,9 @@
 			$server_names=is_array($this->logs['servers']) ? "ENUM('".implode("','",$this->logs['servers'])."')" : "VARCHAR(50)";
 	
 			try {
-				$this->db->exec("CREATE TABLE {$new_table['name']} (
+				$this->db->query("CREATE TABLE {$new_table['name']} (
 					id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
-					timestamp DATETIME(3) NOT NULL,
+					timestamp TIMESTAMP(3) NOT NULL,
 					log_level {$log_levels} NOT NULL,
 					server_name {$server_names} NOT NULL,
 					log_detail VARCHAR(255) NOT NULL,
@@ -177,8 +178,8 @@
 					CONSTRAINT uc_row_unique UNIQUE(timestamp,log_level,server_name,log_detail)
 				)ENGINE=InnoDB");
 			
-			} catch(PDOException $ex) {
-				$this->PDOException($ex);
+			} catch(mysqli_sql_exception $ex) {
+				$this->sqlException($ex);
 			}
 			
 			return $new_table; 
@@ -205,8 +206,8 @@
 			
 			try {
 				
-				$stmt=$this->db->query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = '{$this->getDbName()}' AND table_name like '{$this->table['prefix']}%'");
-				While($row=$stmt->fetch(PDO::FETCH_ASSOC)) {
+				$q=$this->db->query("SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = '{$this->getDbName()}' AND table_name like '{$this->table['prefix']}%'");
+				While($row=$q->fetch_array(MYSQLI_ASSOC)) {
 					
 					$record_date=substr(str_replace(array("{$this->table['prefix']}","_"),array("","-"),$row['TABLE_NAME']),0,10);
 					if($_opts['start']<=$record_date) {
@@ -226,8 +227,8 @@
 					$tables[$record_date][]=$row['TABLE_NAME'];#recording..
 				}
 				
-			} catch(PDOException $ex) {
-				$this->PDOException($ex);
+			} catch(mysqli_sql_exception $ex) {
+				$this->sqlException($ex);
 			}
 			
 			
@@ -243,11 +244,11 @@
 					try{
 						UNSET($sql,$r);
 						$sql=$this->db->query("Select timestamp,log_level,server_name,log_detail FROM {$search_table} WHERE DATE(timestamp)>='{$_opts['start']}' AND DATE(timestamp)<='{$_opts['end']}' {$sql_where} ORDER BY timestamp ASC");
-						While($r=$sql->fetch(PDO::FETCH_ASSOC)) {
+						While($r=$sql->fetch_array(MYSQLI_ASSOC)) {
 							$rows[$r['timestamp']]=array("timestamp"=>$r['timestamp'],"log_level"=>$r['log_level'],"server_name"=>$r['server_name'],"log_detail"=>$r['log_detail']);
 						}
-					} catch(PDOException $ex) {
-						$this->PDOException($ex);
+					} catch(mysqli_sql_exception $ex) {
+						$this->sqlException($ex);
 					}
 				}
 			}
@@ -280,10 +281,10 @@
 		public function getDbTables() {
 			
 			$arr=array();
-			$statement = $this->db->query('SHOW TABLES');
+			$q = $this->db->query('SHOW TABLES');
 			 
 			//Loop through our table names.
-			foreach($statement->fetchAll(PDO::FETCH_NUM) as $table){
+			While($table=$q->fetch_array(MYSQLI_NUM)){
 				$arr[]=$table[0];
 			}	
 			
@@ -297,18 +298,19 @@
 		* Function : Database : Catch error from sql query.
 		* Output : Void ( maybe terminate function )
 										****************/
-		public function PDOException($_ex,$_opt=array("terminate"=>true)): void {
+		public function sqlException($_ex,$_opt=array("terminate"=>true)): void {
 			
 			## GET DETAILS FROM PDOException
 			$err['message']=$_ex->getMessage();
 			$err['code']=$_ex->getCode();
 			$err['file']=$_ex->getFile();
 			$err['line']=$_ex->getLine();
+		
 			foreach($_ex->getTrace() as $t) {
 				if($t['function']=="query" && is_string($t['args'][0])) 
 					$err['query']=$t['args'][0];
 			}
-			
+				
 			## START - CREATE ERROR LOG
 				/* ....... */
 			## END - CREATE ERROR LOG
