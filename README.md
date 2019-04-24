@@ -1,4 +1,4 @@
-# Big Data - Log Listener - APACHE KAFKA on Docker
+# Big Data - Log Listener on Docker
 
 Big data - Website log listener demo with PHP & MYSQL & KAFKA. Run on docker.
 * Task 1 - Real-time display logs on charts 
