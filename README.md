@@ -1,8 +1,8 @@
-# Big Data - Log Listener with KAFKA - Dockerfile
+# Big Data - Log Listener - APACHE KAFKA on Docker
 
-Big data - log listener PHP & MYSQL & KAFKA.
-Upload logs to mysql and real-time display on charts.
-Explode big data with sql logs tables. Search it easy.
+Big data - Website log listener demo with PHP & MYSQL & KAFKA. Run on docker.
+* Task 1 - Real-time display logs on charts 
+* Task 2 - Upload exploding logs to sql by kafka. And searc it easy and fast.
 
 ## Requirements
 
